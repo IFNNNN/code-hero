@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>CODE HERO</title>
+<style>
+:root{--c1:#27e1c1;--c2:#ffd23f;--c3:#ff5d8f;--bg:#0d1033;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:#fff;font-family:system-ui,"Noto Sans Thai",sans-serif;display:flex;flex-direction:column;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#wrap{position:relative;overflow:hidden;border-radius:8px;box-shadow:0 0 30px #27e1c155}
+canvas{width:100%;height:100%;display:block;image-rendering:pixelated}
+.scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:.5em;background:rgba(10,12,40,.9);text-align:center;padding:1em;font-size:1em}
+.scr.on{display:flex}
+.b{font:inherit;font-weight:700;padding:.45em 1.3em;border:0;border-radius:.6em;background:var(--c1);color:#0d1033;box-shadow:0 .2em 0 #148a77;cursor:pointer;min-width:9em}
+.b:active{transform:translateY(.1em)}.b.o{background:var(--c2);box-shadow:0 .2em 0 #b08a00}.b.p{background:var(--c3);box-shadow:0 .2em 0 #a02a53}
+.b[disabled]{opacity:.45}
+h1{margin:0;font-size:2.8em;letter-spacing:.08em;background:linear-gradient(#ffd23f,#ff5d8f);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 .06em 0 #000)}
+h2{margin:0;font-size:1.8em;color:var(--c2)}
+p{margin:.2em 0;max-width:30em;line-height:1.35}
+.row{display:flex;gap:.5em;flex-wrap:wrap;justify-content:center}
+#qa{display:flex;flex-direction:column;gap:.4em;width:min(32em,92%)}
+#qa .b{background:#fff;color:#0d1033;box-shadow:0 .2em 0 #8890c0;text-align:left;min-width:0}
+#qa .ok{background:#4ee07a!important}#qa .no{background:#ff7a8a!important}
+#hb{position:absolute;top:.3em;right:.4em;display:flex;gap:.3em;z-index:5}
+#hb button{font-size:1em;border:0;border-radius:.4em;padding:.15em .5em;background:#0008;color:#fff}
+#tc{display:none;justify-content:space-between;align-items:center;padding:6px 14px calc(8px + env(safe-area-inset-bottom,0px));gap:10px}
+.touch #tc{display:flex}
+#tc button{height:68px;border:0;border-radius:16px;background:#27e1c1aa;color:#0d1033;font-size:28px;font-weight:800;touch-action:none}
+#tc .m{width:86px}#tc .j{width:140px;background:#ffd23fcc}
+</style></head><body>
+<div id="stage"><div id="wrap">
+<canvas id="cv" width="800" height="448"></canvas>
+<div id="hb"><button id="bm">🔊</button><button id="bp">❚❚</button></div>
+
+<div class="scr on" id="menu"><h1>CODE HERO</h1><p style="color:var(--c1);font-weight:700">ผจญภัยโลกแห่งโค้ด</p>
+<button class="b" id="bs">START GAME</button>
+<div class="row" id="lvb"></div>
+<div class="row"><button class="b o" id="bh">HOW TO PLAY</button><button class="b o" id="bt">SETTINGS</button></div>
+<p id="best" style="font-size:.8em;opacity:.8"></p></div>
+
+<div class="scr" id="how"><h2>HOW TO PLAY</h2>
+<p>← → / A D = เดิน • Space / ↑ / W = กระโดด (กดค้างเพื่อกระโดดสูง) • P = หยุดเกม<br>มือถือ: ใช้ปุ่มด้านล่างจอ</p>
+<p>เก็บ Data Crystal ◆ • กระโดดเหยียบ Bug และ Virus Bot • หลบหนามและเหว<br>ชนกล่อง <b style="color:#ffd23f">?</b> เพื่อตอบคำถามคอมพิวเตอร์ • เก็บกุญแจ 🔑 เปิดประตู แล้วไปถึงธงเส้นชัย!</p>
+<button class="b" data-s="menu">BACK</button></div>
+
+<div class="scr" id="set"><h2>SETTINGS</h2>
+<button class="b o" id="bsd">เสียง: เปิด</button>
+<button class="b p" id="brs">ล้างสถิติทั้งหมด</button>
+<button class="b" data-s="menu">BACK</button></div>
+
+<div class="scr" id="quiz"><h2>❓ CODE QUIZ</h2><p id="qt" style="font-weight:700;font-size:1.1em"></p><div id="qa"></div><p id="qf"></p><button class="b" id="qc" style="display:none">เล่นต่อ ▶</button></div>
+
+<div class="scr" id="pause"><h2>PAUSED</h2><button class="b" id="bres">RESUME</button><button class="b o" id="bpm">MAIN MENU</button></div>
+
+<div class="scr" id="win"><h2>LEVEL COMPLETE!</h2><p id="ws"></p><div class="row"><button class="b" id="bn">NEXT LEVEL</button><button class="b o" id="bpa">PLAY AGAIN</button><button class="b p" id="bwm">MENU</button></div></div>
+
+<div class="scr" id="over"><h2 style="color:var(--c3)">GAME OVER</h2><p id="os"></p><div class="row"><button class="b" id="br">RETRY</button><button class="b o" id="bom">MAIN MENU</button></div></div>
+</div></div>
+<div id="tc"><div style="display:flex;gap:10px"><button class="m" id="tl">◀</button><button class="m" id="tr">▶</button></div><button class="j" id="tj">JUMP</button></div>
+
+<script>
+/* ===== CODE HERO ===== */
+const $=id=>document.getElementById(id),cv=$('cv'),g=cv.getContext('2d'),T=32,W=800,H=448,GY=11*T;
+
+/* ---------- 1) QUESTION BANK: [ระดับ(1-3), คำถาม, [4 ตัวเลือก], index คำตอบถูก, คำอธิบาย] เพิ่ม/แก้ได้ที่นี่ ---------- */
+const QB=[
+[1,'CPU ทำหน้าที่อะไรในคอมพิวเตอร์?',['ประมวลผลคำสั่ง','เก็บไฟล์ถาวร','แสดงภาพบนจอ','จ่ายไฟให้เครื่อง'],0,'CPU คือหน่วยประมวลผลกลาง เปรียบเหมือนสมองของเครื่อง'],
+[1,'ข้อใดเป็นอุปกรณ์รับข้อมูล (Input)?',['ลำโพง','เครื่องพิมพ์','คีย์บอร์ด','จอภาพ'],2,'คีย์บอร์ดส่งข้อมูลเข้าเครื่อง ส่วนที่เหลือเป็นอุปกรณ์แสดงผล'],
+[1,'ข้อใดเป็นอุปกรณ์จัดเก็บข้อมูล?',['เมาส์','Flash Drive','ลำโพง','เว็บแคม'],1,'Flash Drive ใช้เก็บไฟล์ไว้ได้แม้ไม่มีไฟเลี้ยง'],
+[1,'AI ย่อมาจากคำว่าอะไร?',['Automatic Internet','Artificial Intelligence','Advanced Input','Active Interface'],1,'AI = Artificial Intelligence หรือปัญญาประดิษฐ์'],
+[1,'HTML ใช้สำหรับอะไร?',['ตัดต่อวิดีโอ','ป้องกันไวรัส','สร้างโครงสร้างหน้าเว็บ','เพิ่มความเร็วเน็ต'],2,'HTML คือภาษาที่ใช้กำหนดโครงสร้างของหน้าเว็บ'],
+[1,'RAM มีหน้าที่อะไร?',['เก็บข้อมูลชั่วคราวขณะทำงาน','เก็บข้อมูลถาวร','ระบายความร้อน','เชื่อมต่อเครือข่าย'],0,'RAM เก็บข้อมูลที่กำลังใช้งาน และข้อมูลจะหายเมื่อปิดเครื่อง'],
+[2,'ตัวแปรในภาษาโปรแกรมมีหน้าที่อะไร?',['วาดรูป','เก็บค่าข้อมูลไว้ใช้งาน','ปิดโปรแกรม','เชื่อมต่ออินเทอร์เน็ต'],1,'ตัวแปรเหมือนกล่องที่มีชื่อ ใช้เก็บค่าเพื่อนำมาใช้ภายหลัง'],
+[2,'อัลกอริทึมหมายถึงอะไร?',['ชนิดของเมาส์','ภาษาโปรแกรม','ไวรัสชนิดหนึ่ง','ขั้นตอนการแก้ปัญหาอย่างเป็นลำดับ'],3,'อัลกอริทึมคือลำดับขั้นตอนที่ชัดเจนเพื่อแก้ปัญหา'],
+[2,'การใช้ if-else ในโปรแกรมมีจุดประสงค์อะไร?',['ทำซ้ำไม่จำกัด','ลบไฟล์','ตัดสินใจเลือกทำตามเงื่อนไข','เก็บข้อมูล'],2,'if-else ให้โปรแกรมเลือกทางทำงานตามเงื่อนไขจริงหรือเท็จ'],
+[2,'Loop (ลูป) ใช้ทำอะไร?',['หยุดโปรแกรม','เปลี่ยนสีหน้าจอ','ทำคำสั่งซ้ำ ๆ','ส่งอีเมล'],2,'Loop ช่วยให้เขียนคำสั่งเดียวแล้วทำซ้ำได้หลายรอบ'],
+[2,'เลขฐานสองใช้ตัวเลขอะไรบ้าง?',['1 ถึง 9','0 และ 1','0 ถึง 7','A และ B'],1,'คอมพิวเตอร์ใช้ 0 และ 1 แทนข้อมูลทั้งหมด'],
+[2,'ข้อใดเป็นตัวอย่างระบบปฏิบัติการ (OS)?',['Paint','Word','Windows','Chrome'],2,'Windows เป็น OS ส่วนที่เหลือเป็นโปรแกรมประยุกต์'],
+[3,'ข้อใดเป็นรหัสผ่านที่ปลอดภัย?',['12345678','password','ชื่อและวันเกิดของเรา','Tr!9#kQz82$m'],3,'รหัสที่ยาว สุ่ม และผสมอักขระหลายแบบเดาได้ยากที่สุด'],
+[3,'หากพบลิงก์น่าสงสัย ควรทำอย่างไร?',['กดดูทันที','ไม่กด แล้วลบหรือรายงาน','ส่งต่อให้เพื่อน','กรอกรหัสผ่านทันที'],1,'ลิงก์น่าสงสัยอาจเป็นการหลอกลวง อย่ากดและควรรายงาน'],
+[3,'Phishing คืออะไร?',['การเร่งความเร็วเน็ต','โปรแกรมตัดต่อ','การหลอกให้เปิดเผยข้อมูลสำคัญ','ชนิดของฮาร์ดดิสก์'],2,'Phishing คือการปลอมตัวเพื่อหลอกเอาข้อมูล เช่น รหัสผ่าน'],
+[3,'ข้อใดช่วยป้องกันไวรัสได้ดีที่สุด?',['โหลดโปรแกรมเถื่อน','ใช้รหัสเดียวทุกที่','ปิดจอตลอดเวลา','อัปเดตระบบและใช้โปรแกรมป้องกันไวรัส'],3,'การอัปเดตและมีโปรแกรมป้องกันไวรัสช่วยลดช่องโหว่'],
+[3,'การยืนยันตัวตนสองชั้น (2FA) ช่วยอะไร?',['เพิ่มความปลอดภัยของบัญชี','เพิ่มความเร็วเครื่อง','ลดขนาดไฟล์','ปิดโฆษณา'],0,'2FA ต้องใช้ข้อมูลมากกว่าหนึ่งอย่าง จึงเจาะบัญชียากขึ้น'],
+[3,'Firewall ทำหน้าที่อะไร?',['เพิ่มพื้นที่จัดเก็บ','กรองการเชื่อมต่อที่ไม่ปลอดภัย','แปลภาษา','ชาร์จแบตเตอรี่'],1,'Firewall คือกำแพงไฟที่คอยกรองข้อมูลเข้าออกเครือข่าย']];
+
+/* ---------- 2) LEVEL DATA (หน่วยเป็น "ช่อง" 1 ช่อง=32px, แถวพื้น=11) ---------- */
+// gr พื้น[เริ่ม,จบ] pl แพลตฟอร์ม[x,แถว,ยาว] co เหรียญ[x,แถว,จำนวน] bx กล่องปริศนา[x,แถว]
+// en ศัตรู[x,ชนิด b=Bug v=VirusBot,ระยะpx] sp หนาม[x,ยาว] mv แพลตฟอร์มเคลื่อนที่[x,แถว,ระยะpx,ยาว]
+const LV=[
+{n:'Digital Forest',th:0,w:128,gr:[[0,22],[25,46],[49,72],[75,98],[101,128]],
+pl:[[12,8,3],[30,8,3],[36,6,3],[55,8,3],[60,6,3],[80,8,3],[86,6,3],[106,8,4]],
+co:[[5,10,3],[12,7,3],[30,7,3],[36,5,3],[52,10,3],[55,7,3],[60,5,3],[80,7,3],[86,5,3],[106,7,2],[115,10,3]],
+bx:[[18,7],[40,7],[66,7],[90,7]],en:[[34,'b',80],[58,'b',100],[83,'v',90],[110,'v',90]],sp:[[44,2],[69,1],[95,1]],
+mv:[],ck:[51,103],key:[108,7],door:120,flag:125},
+{n:'Circuit City',th:1,w:134,gr:[[0,18],[24,40],[46,62],[68,84],[90,104],[110,134]],
+pl:[[6,8,3],[28,8,3],[32,6,3],[50,8,3],[54,6,3],[72,8,3],[76,6,3],[94,8,3],[98,6,3],[114,8,3]],
+co:[[3,10,3],[6,7,3],[26,10,2],[28,7,3],[32,5,3],[50,7,3],[54,5,3],[72,7,3],[76,5,3],[94,7,3],[98,5,3],[114,7,2],[120,10,4]],
+bx:[[14,7],[36,7],[58,7],[80,7],[102,7]],en:[[28,'v',100],[50,'v',100],[74,'b',100],[94,'v',100],[116,'v',120]],
+sp:[[34,2],[56,2],[78,1],[98,1],[120,2]],mv:[[18,11,128,2],[40,11,128,2],[62,11,128,2],[84,11,128,2],[104,11,128,2]],
+ck:[48,91],key:[116,7],door:126,flag:131},
+{n:'Virus Fortress',th:2,w:140,gr:[[0,14],[18,30],[34,44],[48,62],[66,76],[80,96],[100,112],[116,140]],
+pl:[[8,8,3],[22,8,2],[24,6,2],[38,8,3],[52,8,2],[56,6,3],[70,8,3],[84,8,2],[88,6,3],[104,8,3],[120,8,3]],
+co:[[3,10,3],[8,7,3],[22,7,2],[24,5,2],[38,7,3],[52,7,2],[56,5,3],[70,7,3],[84,7,2],[88,5,3],[104,7,3],[121,7,2]],
+bx:[[12,7],[26,7],[42,7],[60,7],[92,7],[108,7]],en:[[20,'v',100],[36,'v',80],[50,'v',120],[68,'b',90],[84,'v',100],[102,'v',100],[118,'v',120],[128,'v',100]],
+sp:[[24,1],[40,1],[56,2],[70,1],[90,2],[106,1],[124,2]],mv:[[76,11,64,2],[112,11,64,2]],
+ck:[49,101],key:[120,7],door:132,flag:137}];
+const TH=[{s:['#6ee7ff','#d9fff0'],m:'#2aa87a',m2:'#1f8a63',g:'#3b2a56',t:'#4ee07a'},{s:['#2a1058','#6a2fb5'],m:'#3b1d7a',m2:'#5b2ca3',g:'#1b1740',t:'#27e1c1'},{s:['#2a0610','#8a1a2a'],m:'#4a0f1c',m2:'#6b1426',g:'#1a0c14',t:'#ff5d8f'}];
+
+/* ---------- 3) STATE / SAVE / SOUND ---------- */
+let save={un:1,best:0};try{Object.assign(save,JSON.parse(localStorage.getItem('codehero')||'{}'))}catch(e){}
+const store=()=>{try{localStorage.setItem('codehero',JSON.stringify(save))}catch(e){}};
+let st='menu',L=0,lv,P,cam=0,sc=0,sc0=0,lives=3,coins=0,hasKey=false,lvA=0,lvC=0,used=[],parts=[],t=0,msg='',mt=0,cpx=64,jb=0,snd=true,ac=null,curQ=null;
+const keys={},tc={l:0,r:0,j:0};
+const S={jump:[[300,.08],[520,.1]],coin:[[880,.06],[1320,.1]],ok:[[523,.1],[659,.1],[784,.2]],no:[[200,.2],[150,.3]],win:[[523,.12],[659,.12],[784,.12],[1046,.3]],hurt:[[300,.1],[200,.1],[120,.3]],stomp:[[400,.06],[600,.08]],key:[[700,.08],[900,.08],[1200,.15]]};
+function sfx(n){if(!snd)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();let c=ac.currentTime;S[n].forEach(([f,d])=>{const o=ac.createOscillator(),v=ac.createGain();o.type='square';o.frequency.value=f;v.gain.setValueAtTime(.05,c);v.gain.exponentialRampToValueAtTime(.001,c+d);o.connect(v);v.connect(ac.destination);o.start(c);o.stop(c+d);c+=d*.8})}catch(e){}}
+function setSnd(v){snd=v;$('bm').textContent=v?'🔊':'🔇';$('bsd').textContent='เสียง: '+(v?'เปิด':'ปิด')}
+const show=id=>document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));
+const say=s=>{msg=s;mt=200};
+const hit=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+function spark(x,y,n,c){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*5,vy:-Math.random()*4,l:25+Math.random()*15,c})}
+
+/* ---------- 4) LEVEL BUILD / GAME FLOW ---------- */
+function build(i){const d=LV[i];lv={d,w:d.w*T,
+S:d.gr.map(([a,b])=>({x:a*T,y:GY,w:(b-a)*T,h:300})),
+pl:d.pl.map(([x,r,n])=>({x:x*T,y:r*T,w:n*T,h:12})),co:[],
+bx:d.bx.map(([x,r])=>({x:x*T,y:r*T,w:T,h:T,used:false})),
+en:d.en.map(([x,k,r])=>{const h=k=='b'?24:28;return{x:x*T,x0:x*T,x1:x*T+r,k,w:28,h,y:GY-h,dir:1,alive:true,sp:k=='b'?.8:1.4}}),
+sp:d.sp.map(([x,n])=>({x:x*T,y:GY-16,w:n*T,h:16})),
+mv:d.mv.map(([x,r,rg,n],k)=>({x:x*T,x0:x*T,x1:x*T+rg,y:r*T,w:n*T,h:12,d:1,sp:1+k%2*.5,dx:0})),
+ck:d.ck.map(x=>({x:x*T,on:false})),key:{x:d.key[0]*T+4,y:d.key[1]*T,w:24,h:24,got:false},
+door:{x:d.door*T,y:GY-5*T,w:T,h:5*T,open:false},flag:d.flag*T};
+d.co.forEach(([x,r,n])=>{for(let k=0;k<n;k++)lv.co.push({x:(x+k)*T+6,y:r*T+6,w:20,h:20,got:false})})}
+const newP=(x,y)=>({x,y,w:24,h:36,vx:0,vy:0,on:false,face:1,co:0,inv:0,ride:null});
+function startLevel(i,carry){L=i;build(i);if(!carry)sc=0;sc0=sc;lives=3;coins=0;hasKey=false;lvA=0;lvC=0;used=[];parts=[];cpx=64;P=newP(64,300);cam=0;st='play';show();
+if(i==0)say('← → เดิน • Space กระโดด • ชนกล่อง ? เพื่อตอบคำถาม!');else say('ด่าน '+(i+1)+': '+LV[i].n)}
+function hurt(fall){if(P.inv>0&&!fall)return;lives--;sfx('hurt');spark(P.x+12,P.y+18,14,'#ff5d8f');
+if(lives<=0){st='over';$('os').innerHTML='คะแนนที่ทำได้: <b>'+sc+'</b><br>ตอบถูก '+lvC+'/'+lvA+' ข้อ';show('over');return}
+P=newP(cpx,300);P.inv=100;say('เหลือ '+lives+' ชีวิต!')}
+function win(){st='win';sfx('win');save.un=Math.min(3,Math.max(save.un,L+2));save.best=Math.max(save.best,sc);store();
+const pc=lvA?Math.round(lvC/lvA*100):0;
+$('ws').innerHTML='คะแนนรวม: <b>'+sc+'</b> • เหรียญ '+coins+'<br>ตอบถูก '+lvC+'/'+lvA+' ข้อ ('+pc+'%)'+(L==2?'<br>🎉 คุณกู้โลกดิจิทัลสำเร็จแล้ว!':'');
+$('bn').style.display=L==2?'none':'';show('win')}
+function toMenu(){st='menu';build(0);cam=0;P=null;show('menu');menuUI()}
+function menuUI(){const r=$('lvb');r.innerHTML='';LV.forEach((d,i)=>{const b=document.createElement('button');const ok=i<save.un;b.className='b o';b.style.minWidth='0';b.textContent=ok?'ด่าน '+(i+1):'🔒 '+(i+1);b.disabled=!ok;b.onclick=()=>startLevel(i);r.appendChild(b)});$('best').textContent='คะแนนสูงสุด: '+save.best}
+
+/* ---------- 5) QUIZ ---------- */
+function quiz(){st='quiz';const all=QB.map((q,i)=>i);let p=all.filter(i=>QB[i][0]==L+1&&!used.includes(i));
+if(!p.length)p=all.filter(i=>QB[i][0]<=L+1&&!used.includes(i));if(!p.length){used=[];p=all.filter(i=>QB[i][0]==L+1)}
+const i=p[Math.random()*p.length|0];used.push(i);curQ=QB[i];$('qt').textContent=curQ[1];$('qf').textContent='';$('qc').style.display='none';
+const o=[0,1,2,3].sort(()=>Math.random()-.5),box=$('qa');box.innerHTML='';
+o.forEach(k=>{const b=document.createElement('button');b.className='b';b.textContent=curQ[2][k];b.onclick=()=>answer(k,b);b.dataset.k=k;box.appendChild(b)});show('quiz')}
+function answer(k,btn){const ok=k==curQ[3];lvA++;[...$('qa').children].forEach(b=>{b.disabled=true;if(+b.dataset.k==curQ[3])b.classList.add('ok')});
+if(ok){lvC++;sc+=200;sfx('ok');$('qf').innerHTML='✅ ถูกต้อง! +200 คะแนน<br><small>'+curQ[4]+'</small>';spark(P.x+12,P.y,16,'#ffd23f')}
+else{btn.classList.add('no');sfx('no');$('qf').innerHTML='❌ ยังไม่ถูก<br><small>'+curQ[4]+'</small>'}
+$('qc').style.display=''}
+
+/* ---------- 6) GAME LOGIC (60 FPS fixed step) ---------- */
+const solids=()=>lv.door.open?lv.S.concat(lv.bx):lv.S.concat(lv.bx,[lv.door]);
+function touchSolid(r){if(r.used===false){r.used=true;quiz();return}if(r===lv.door&&hasKey){r.open=true;sfx('key');say('ประตูเปิดแล้ว!')}}
+const jh=()=>keys.Space||keys.ArrowUp||keys.KeyW||tc.j;
+function step(){t++;
+lv.mv.forEach(m=>{m.dx=m.d*m.sp;m.x+=m.dx;if(m.x>=m.x1){m.x=m.x1;m.d=-1}else if(m.x<=m.x0){m.x=m.x0;m.d=1}});
+if(P.ride){P.x+=P.ride.dx;P.ride=null}
+const dir=((keys.ArrowRight||keys.KeyD||tc.r)?1:0)-((keys.ArrowLeft||keys.KeyA||tc.l)?1:0);
+P.vx+=(dir*3.6-P.vx)*(P.on?.35:.2);if(!dir&&Math.abs(P.vx)<.1)P.vx=0;if(dir)P.face=dir;
+if(jb>0)jb--;if(P.on)P.co=6;else if(P.co>0)P.co--;
+if(jb>0&&P.co>0){P.vy=-11.5;P.on=false;P.co=0;jb=0;sfx('jump');spark(P.x+12,P.y+36,5,'#fff')}
+if(!jh()&&P.vy<-4)P.vy*=.6;
+P.x+=P.vx;
+for(const r of solids())if(hit(P,r)){touchSolid(r);if(r===lv.door&&lv.door.open)continue;
+ if(P.vx>0)P.x=r.x-P.w;else if(P.vx<0)P.x=r.x+r.w;else P.x=P.x+P.w/2<r.x+r.w/2?r.x-P.w:r.x+r.w}
+P.x=Math.max(0,Math.min(lv.w-P.w,P.x));
+const pb=P.y+P.h;P.vy=Math.min(P.vy+.55,12);P.y+=P.vy;P.on=false;
+for(const r of solids())if(hit(P,r)){touchSolid(r);if(r===lv.door&&lv.door.open)continue;
+ if(P.vy>0){P.y=r.y-P.h;P.on=true;P.vy=0}else if(P.vy<0){P.y=r.y+r.h;P.vy=0}}
+for(const r of lv.pl.concat(lv.mv))if(P.vy>=0&&pb<=r.y+2&&P.x+P.w>r.x&&P.x<r.x+r.w&&P.y+P.h>=r.y){P.y=r.y-P.h;P.vy=0;P.on=true;if(r.dx!==undefined)P.ride=r}
+if(st!='play')return;
+if(P.y>H+60){hurt(true);return}
+if(P.inv>0)P.inv--;
+lv.co.forEach(c=>{if(!c.got&&hit(P,c)){c.got=true;coins++;sc+=10;sfx('coin');spark(c.x+10,c.y+10,6,'#ffd23f')}});
+if(!lv.key.got&&hit(P,lv.key)){lv.key.got=hasKey=true;sfx('key');sc+=50;say('ได้กุญแจแล้ว! ไปเปิดประตูที่ท้ายด่าน 🔑')}
+lv.ck.forEach(c=>{if(!c.on&&P.x>c.x){c.on=true;cpx=c.x;say('Checkpoint ✔')}});
+for(const e of lv.en){if(!e.alive)continue;e.x+=e.dir*e.sp;if(e.x>e.x1)e.dir=-1;else if(e.x<e.x0)e.dir=1;
+ if(hit(P,e)){if(P.vy>0&&pb<=e.y+12){e.alive=false;P.vy=-8;sc+=100;sfx('stomp');spark(e.x+14,e.y+10,12,'#ff5d8f')}else{hurt();if(st!='play')return}}}
+for(const s of lv.sp)if(hit({x:P.x+4,y:P.y,w:P.w-8,h:P.h},s)){hurt();if(st!='play')return}
+if(P.x>lv.flag){win();return}
+cam+=(Math.max(0,Math.min(lv.w-W,P.x-W*.4))-cam)*.1;
+}
+function upd(){parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.15;p.l--});parts=parts.filter(p=>p.l>0);if(mt>0)mt--}
+
+/* ---------- 7) RENDER ---------- */
+const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),w,h)};
+function bg(){const th=TH[lv.d.th],gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,th.s[0]);gr.addColorStop(1,th.s[1]);g.fillStyle=gr;g.fillRect(0,0,W,H);
+ const k=lv.d.th;
+ if(k==0){for(let i=0;i<6;i++){const x=((i*190-cam*.1)%1140+1140)%1140-120;R(x,50+i%3*30,70,16,'#fff');R(x+14,40+i%3*30,40,16,'#fff')}}
+ for(let i=-1;i<7;i++){const x=i*160-(cam*.2%160);g.fillStyle=th.m;g.beginPath();
+  if(k==1){g.rect(x,200+(i&3)*20,80,260)}else{g.moveTo(x,GY);g.lineTo(x+80,160+(i&1)*40);g.lineTo(x+160,GY)}g.fill()}
+ for(let i=-1;i<12;i++){const x=i*100-(cam*.5%100);
+  if(k==0){R(x+20,GY-70,10,70,'#6b4a2b');R(x,GY-110,50,50,th.m2);R(x+8,GY-130,34,30,th.t)}
+  else if(k==1){R(x,GY-60-(i&3)*14,60,3,th.t);R(x+57,GY-64-(i&3)*14,8,8,th.t);R(x+30,GY-60-(i&3)*14,3,60,th.m2)}
+  else{R(x+10,GY-120,40,120,th.m2);R(x+26,GY-110,8,8,(t>>4)&1?'#ff3355':'#661122')}}}
+function drawP(){if(P.inv>0&&(t>>2)&1)return;const w=P.on&&Math.abs(P.vx)>.5,ph=(t>>3)&1;let a=0,b=0;if(w){a=ph?3:-3;b=-a}if(!P.on){a=4;b=-2}
+ g.save();g.translate(Math.round(P.x-cam+12),Math.round(P.y));g.scale(P.face,1);
+ R(-8+a,26,7,10,'#243b8f');R(1+b,26,7,10,'#243b8f');R(-14,16,6,14+(w?ph*2:0),'#ffd23f');R(-9,16,18,12,'#27e1c1');R(-3,19,6,5,'#0d1033');
+ R(-10,2,20,14,'#ffd9a8');R(-11,-3,22,8,'#ff5d8f');R(-11,-3,5,16,'#ff5d8f');R(3,6,3,4,'#000');R(8,10,3,2,'#e0907a');g.restore()}
+function draw(){if(!lv)return;const th=TH[lv.d.th];bg();
+ g.save();g.translate(-Math.round(cam),0);
+ lv.S.forEach(r=>{if(r.x+r.w<cam||r.x>cam+W)return;R(r.x,GY,r.w,H-GY,th.g);R(r.x,GY,r.w,6,th.t);for(let x=r.x;x<r.x+r.w;x+=T){R(x,GY+6,2,H,'#0003');R(x,GY+T,T,2,'#0003')}});
+ lv.pl.forEach(r=>{R(r.x,r.y,r.w,12,th.t);R(r.x,r.y+8,r.w,4,'#0005');for(let x=r.x+4;x<r.x+r.w;x+=T)R(x,r.y+3,4,4,'#fff8')});
+ lv.mv.forEach(r=>{R(r.x,r.y,r.w,12,'#27e1c1');R(r.x,r.y+8,r.w,4,'#0a8a78');R(r.x+r.w/2-4,r.y+3,8,4,'#fff')});
+ lv.sp.forEach(s=>{g.fillStyle='#ddd';for(let x=s.x;x<s.x+s.w;x+=16){g.beginPath();g.moveTo(x,GY);g.lineTo(x+8,GY-16);g.lineTo(x+16,GY);g.fill()}});
+ lv.bx.forEach(b=>{R(b.x,b.y,T,T,b.used?'#8a7a50':'#ffd23f');R(b.x+3,b.y+3,T-6,T-6,b.used?'#a39266':'#ffb300');if(!b.used){g.fillStyle='#fff';g.font='bold 22px monospace';g.fillText('?',b.x+11,b.y+24)}});
+ lv.co.forEach(c=>{if(c.got)return;const w=Math.abs(Math.sin(t/12+c.x))*10+4;g.fillStyle='#4de1ff';g.beginPath();g.moveTo(c.x+10,c.y);g.lineTo(c.x+10+w,c.y+10);g.lineTo(c.x+10,c.y+20);g.lineTo(c.x+10-w,c.y+10);g.fill()});
+ if(!lv.key.got){const k=lv.key;R(k.x,k.y+Math.sin(t/10)*3,12,12,'#ffd23f');R(k.x+10,k.y+4+Math.sin(t/10)*3,14,4,'#ffd23f');R(k.x+19,k.y+7+Math.sin(t/10)*3,4,6,'#ffd23f')}
+ lv.ck.forEach(c=>{R(c.x,GY-48,4,48,'#ccc');R(c.x+4,GY-48,20,14,c.on?'#4ee07a':'#888')});
+ const d=lv.door;if(!d.open){R(d.x,d.y,T,d.h,'#6b7080');R(d.x+4,d.y+4,T-8,d.h-8,'#8d93a8');R(d.x+10,d.y+d.h/2-6,12,12,'#ffd23f')}
+ R(lv.flag,GY-130,5,130,'#eee');R(lv.flag+5,GY-130,44,28,'#ff5d8f');R(lv.flag+14,GY-122,6,6,'#fff');
+ lv.en.forEach(e=>{if(!e.alive)return;const wg=(t>>3)&1;
+  if(e.k=='b'){R(e.x,e.y+6,28,18,'#ff4d4d');R(e.x+4,e.y+2,20,6,'#ff4d4d');R(e.x+4+wg*2,e.y+22,6,4,'#900');R(e.x+18-wg*2,e.y+22,6,4,'#900');R(e.x+5,e.y+9,6,6,'#fff');R(e.x+17,e.y+9,6,6,'#fff');R(e.x+8,e.y+11,3,3,'#000');R(e.x+20,e.y+11,3,3,'#000')}
+  else{const y=e.y+Math.sin(t/8)*2;R(e.x,y+4,28,24,'#9b5de5');R(e.x+13,y-4,2,8,'#ccc');R(e.x+11,y-7,6,4,'#ff5d8f');R(e.x+3,y+10,22,7,'#ffd23f');R(e.x+8+(e.dir>0?6:0),y+12,4,3,'#000')}});
+ if(P)drawP();
+ parts.forEach(p=>{g.globalAlpha=Math.min(1,p.l/15);R(p.x,p.y,3,3,p.c)});g.globalAlpha=1;g.restore();
+ if(P&&st!='menu'){R(0,0,W,34,'#0008');g.font='bold 16px monospace';g.fillStyle='#fff';g.fillText('SCORE '+String(sc).padStart(6,'0'),10,22);
+  g.fillStyle='#ff5d8f';g.fillText('♥'.repeat(Math.max(0,lives)),170,22);g.fillStyle='#4de1ff';g.fillText('◆ '+coins+'/'+lv.co.length,235,22);
+  g.fillStyle=hasKey?'#ffd23f':'#555';g.fillText('🔑',330,22);g.fillStyle='#fff';g.fillText(lv.d.n,365,22);
+  R(530,12,150,10,'#fff3');R(530,12,150*Math.min(1,P.x/lv.flag),10,'#27e1c1')}
+ if(mt>0&&st=='play'){g.globalAlpha=Math.min(1,mt/30);g.font='bold 15px sans-serif';const w=g.measureText(msg).width+24;R(W/2-w/2,H-50,w,30,'#000a');g.fillStyle='#fff';g.fillText(msg,W/2-w/2+12,H-30);g.globalAlpha=1}}
+
+/* ---------- 8) LOOP / INPUT / UI ---------- */
+let last=0,acc=0;
+function loop(ts){requestAnimationFrame(loop);const dt=Math.min(50,ts-last);last=ts;
+ if(st=='play'){acc+=dt;while(acc>=16.67&&st=='play'){step();acc-=16.67}upd()}else{acc=0;if(st=='menu'&&lv){cam=(cam+.6)%(lv.w-W);t++}upd()}
+ draw()}
+function togglePause(){if(st=='play'){st='pause';show('pause')}else if(st=='pause'){st='play';show()}}
+addEventListener('keydown',e=>{if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+ if(!keys[e.code]&&['Space','ArrowUp','KeyW'].includes(e.code))jb=8;keys[e.code]=1;if(e.code=='KeyP'||e.code=='Escape')togglePause()});
+addEventListener('keyup',e=>keys[e.code]=0);
+addEventListener('blur',()=>{for(const k in keys)keys[k]=0;tc.l=tc.r=tc.j=0;if(st=='play')togglePause()});
+document.addEventListener('click',e=>{if(e.target.blur)e.target.blur()});
+document.addEventListener('contextmenu',e=>e.preventDefault());
+const hold=(id,k)=>{const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();tc[k]=1;if(k=='j')jb=8});['pointerup','pointercancel','pointerleave'].forEach(n=>b.addEventListener(n,()=>tc[k]=0))};
+hold('tl','l');hold('tr','r');hold('tj','j');
+$('bs').onclick=()=>startLevel(0);
+$('bh').onclick=()=>show('how');$('bt').onclick=()=>show('set');
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>show(b.dataset.s));
+$('bsd').onclick=()=>setSnd(!snd);$('bm').onclick=()=>setSnd(!snd);
+$('brs').onclick=()=>{if(confirm('ล้างสถิติและการปลดล็อกด่านทั้งหมด?')){save={un:1,best:0};store();menuUI()}};
+$('bp').onclick=togglePause;$('bres').onclick=togglePause;$('bpm').onclick=toMenu;
+$('qc').onclick=()=>{st='play';show()};
+$('bn').onclick=()=>startLevel(L+1,true);$('bpa').onclick=()=>startLevel(L);
+$('bwm').onclick=toMenu;$('br').onclick=()=>{sc=sc0;startLevel(L,true)};$('bom').onclick=toMenu;
+function rs(){const s=Math.min(innerWidth/W,$('stage').clientHeight/H);const w=$('wrap');w.style.width=W*s+'px';w.style.height=H*s+'px';w.style.fontSize=Math.max(9,16*s)+'px'}
+if('ontouchstart' in window||navigator.maxTouchPoints>0)document.body.classList.add('touch');
+addEventListener('resize',rs);addEventListener('orientationchange',()=>setTimeout(rs,200));
+build(0);menuUI();rs();setTimeout(rs,100);requestAnimationFrame(loop);
+</script></body></html>
